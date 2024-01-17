@@ -10,12 +10,16 @@ import "simplelightbox/dist/simple-lightbox.min.css";
 
 let key = '41863553-31a4ca98ea592d85823201a44'
 var lightbox = new SimpleLightbox('.gallery a', {captionsData: 'alt', captions: true, captionPosition: 'bottom', captionDelay: 250,});
-    
+
+const gallery = document.querySelector(".gallery");
+const loader =document.querySelector(".loader-container"); 
 const form = document.querySelector('.search-form');
 form.addEventListener('submit', (event) => {
     event.preventDefault();
     event.stopPropagation();
 
+    loader.style.display = 'block';
+    gallery.innerHTML = '';
     let searchText = form.elements["searchText"].value;
     fetch(`https://pixabay.com/api/?key=${key}&q=${searchText}&image_type=photo&orientation=horizontal&safesearch=true`).then((response) => {
         if (!response.ok) {
@@ -28,7 +32,7 @@ form.addEventListener('submit', (event) => {
             iziToast.warning({message: 'Sorry, there are no images matching your search query. Please try again!', position: 'topRight'});
         }
 
-        const gallery = document.querySelector(".gallery");
+        
         let galleryMarkup = jsonData.hits
             .map((image) => `
                 <li class="gallery-item">
@@ -68,7 +72,11 @@ form.addEventListener('submit', (event) => {
             .join("");
 gallery.innerHTML = galleryMarkup;
 lightbox.refresh();
+loader.style.display = 'none';
 
     })
-    .catch((error) => iziToast.error({ message: error, position: 'topRight'}));
+    .catch((error) => {
+        loader.style.display = 'none';
+        iziToast.error({ message: error, position: 'topRight'})
+    } );
 });
